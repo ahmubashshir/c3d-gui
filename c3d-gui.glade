@@ -477,7 +477,7 @@ Author: Ahmad Hasan Mubashshir <ahmubashshir@gmail.com>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <property name="always_show_image">True</property>
-                <signal name="activate" handler="add_activate_cb" swapped="no"/>
+                <signal name="clicked" handler="add_activate_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -493,7 +493,7 @@ Author: Ahmad Hasan Mubashshir <ahmubashshir@gmail.com>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <property name="always_show_image">True</property>
-                <signal name="activate" handler="rm_activate_cb" swapped="no"/>
+                <signal name="clicked" handler="rm_activate_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -509,7 +509,7 @@ Author: Ahmad Hasan Mubashshir <ahmubashshir@gmail.com>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <property name="always_show_image">True</property>
-                <signal name="activate" handler="cl_activate_cb" swapped="no"/>
+                <signal name="clicked" handler="cl_activate_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -525,7 +525,7 @@ Author: Ahmad Hasan Mubashshir <ahmubashshir@gmail.com>
                 <property name="receives_default">True</property>
                 <property name="use_stock">True</property>
                 <property name="always_show_image">True</property>
-                <signal name="activate" handler="pr_activate_cb" swapped="no"/>
+                <signal name="clicked" handler="pr_activate_cb" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>

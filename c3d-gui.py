@@ -1,93 +1,125 @@
 #!/usr/bin/env python3
 import os,sys
 try:
-    import gi
-    gi.require_version('Gtk', '3.0')
-    from gi.repository import Gtk
+	import gi
+	gi.require_version('Gtk', '3.0')
+	from gi.repository import Gtk
 except:
-    print("PyGObject not found")
+	print("PyGObject not found")
 try:
-    import serial
-    from serial.tools.list_ports import comports
-    from serial.tools import hexlify_codec
+	import serial
+	from serial.tools.list_ports import comports
+	from serial.tools import hexlify_codec
 except:
-    print("PySerial Not found")
+	print("PySerial Not found")
 APPDIR=""
 DATADIR="c3d-gui"
 if sys.platform=="linux" or sys.platform=="msys" or sys.platform=="cygwin" :
-    if os.path.exists("/usr/bin/c3d-gui"):
-        APPDIR="/usr/share/"+DATADIR+"/"
-    else:
-        APPDIR=os.getcwd()+"/share/"+DATADIR+"/"
+	if os.path.exists("/usr/bin/c3d-gui"):
+		APPDIR="/usr/share/"+DATADIR+"/"
+	else:
+		APPDIR=os.getcwd()+"/share/"+DATADIR+"/"
 elif sys.platform=="win32":
-    try:
-        import winreg as wr
-        reg=wr.OpenKey(wr.HKET_LOCAL_MACHINE,"SOFTWARE\\PolymathTeam\\C3D-GUI")
-        APPDIR=wr.QueryValueEx(reg,"AppDir")+DATADIR
-        reg.CloseKey()
-    except:
-        APPDIR=os.getcwd()+"\\share\\"+DATADIR+"\\"
+	try:
+		import winreg as wr
+		reg=wr.OpenKey(wr.HKET_LOCAL_MACHINE,"SOFTWARE\\PolymathTeam\\C3D-GUI")
+		APPDIR=wr.QueryValueEx(reg,"AppDir")+DATADIR
+		reg.CloseKey()
+	except:
+		APPDIR=os.getcwd()+"\\share\\"+DATADIR+"\\"
 elif sys.platform=="darwin":
-    pass
+	pass
+from Arduino import arduino
 UI='c3d-gui'
 comport=''
 baudrate=115200
+def show_err(message):
+	dlg=Gtk.MessageDialog(
+		window,
+		0,
+		Gtk.MessageType.ERROR,
+		Gtk.ButtonsType.OK,
+		"You\'ve forgotten Something"
+	)
+	dlg.set_title("Error")
+	dlg.format_secondary_text(message)
+	dlg.run()
+	dlg.destroy()
 class itembox(Gtk.Label):
-    def __init__(self,filepath):
-        self.set_text(filepath)
+	def __init__(self,filepath):
+		self.set_text(filepath)
 
 class Handler:
-    def onDeleteWindow(self, *args):
-        window.destroy()
-        mmenubtn.destroy()
-        Gtk.main_quit(*args)
-    def aboutm_activate(self,*args):
-        #print("Hello")
-        #mmenubtn.get_popover().hide()
-        Rosponse=abt.run()
-        if Rosponse==Gtk.ResponseType.DELETE_EVENT:
-            abt.hide()
-    def sel_done(self,menushell,*args):
-        mmenubtn.get_popover().hide()
-    def gtk_widget_hide(self,wid,*args):
-        abt.hide()
-    
-    def pr_activate_cb():
-        for row in lstsl:
-            print(row[2])
-    def cl_activate_cb():
-        pass
-    def rm_activate_cb():
-        selected=lst.get_selection()
-        try:
-            rows=selected.get_selected_rows()
-            for n in rows:
-                print(str(n)+"\n")
-        except:
-            pass
-    def add_activate_cb():
-        if not fc.get_uri()=="":
-            lstls.append(fc.get_uri(),fc.get_filename(),sum(1 for line in open(fc.get_uri())))
-    def on_selection_changed(selection):
-        model, treeiter = selection.get_selected()
-    def on_cell_toggled(self,*args):
-        pass
-    def chcfg(self,*args):
-        resp=cfg.run()
-        if resp==Gtk.ResponseType.APPLY or resp==Gtk.ResponseType.CANCEL or Gtk.ResponseType.DELETE_EVENT:
-            cfg.hide()
-            if resp==Gtk.ResponseType.APPLY:
-                baudrate=baud.get_value_as_int()
-                comport=comm.get_active_text()
-            print(comport)
-            print(baudrate)
+	def onDeleteWindow(self, *args):
+		window.destroy()
+		mmenubtn.destroy()
+		Gtk.main_quit(*args)
+	def aboutm_activate(self,*args):
+		#print("Hello")
+		#mmenubtn.get_popover().hide()
+		Rosponse=abt.run()
+		if Rosponse==Gtk.ResponseType.DELETE_EVENT:
+			abt.hide()
+	def sel_done(self,menushell,*args):
+		mmenubtn.get_popover().hide()
+	def gtk_widget_hide(self,wid,*args):
+		abt.hide()
+	
+	def pr_activate_cb(self,*args):
+		try:
+			path=fc.get_uri().replace("file://",'')
+			print(path)
+		except AttributeError:
+			show_err("Select file to print")
+		printer=None
+		try:
+			if baudrate==None or comport=='':
+				printer=arduino.port()
+				print(printer)
+				if printer != None:
+					printer.sendFile(path)
+			else:
+				printer=arduino.port(port=comport,baud=baudrate)
+				print(printer)
+				if printer != None:
+					printer.sendFile(path)
+
+		except arduino.InvalidPort:
+			show_err("You should plug & connect\nthe printer before printing")
+	def cl_activate_cb():
+		print("clear")
+	def rm_activate_cb():
+		selected=lst.get_selection()
+		try:
+			rows=selected.get_selected_rows()
+			for n in rows:
+				print(str(n)+"\n")
+		except:
+			print("rm")
+	def add_activate_cb():
+		print("add")
+		if not fc.get_uri()=="":
+			lstls.append(fc.get_uri(),fc.get_filename(),sum(1 for line in open(fc.get_uri())))
+	def on_selection_changed(selection):
+		model, treeiter = selection.get_selected()
+	def on_cell_toggled(self,*args):
+		pass
+	def chcfg(self,*args):
+		resp=cfg.run()
+		if resp==Gtk.ResponseType.APPLY or resp==Gtk.ResponseType.CANCEL or Gtk.ResponseType.DELETE_EVENT:
+			cfg.hide()
+			if resp==Gtk.ResponseType.APPLY:
+				baudrate=baud.get_value_as_int()
+				comport=comm.get_active_text()
+			print(comport)
+			print(baudrate)
 #Dont Edit
 builder = Gtk.Builder()
 try:
-    print(APPDIR+UI+'.glade')
-    builder.add_from_file(APPDIR+UI+'.glade')
+	print(APPDIR+UI+'.glade')
+	builder.add_from_file(APPDIR+UI+'.glade')
 except:
-    builder.add_from_file(UI+'.glade')
+	builder.add_from_file(UI+'.glade')
 builder.connect_signals(Handler())
 
 
