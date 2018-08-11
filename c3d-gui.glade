@@ -338,7 +338,8 @@ Author: Ahmad Hasan Mubashshir <ahmubashshir@gmail.com>
           <object class="GtkProgressBar" id="filepb">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="show_text">True</property>
+            <property name="no_show_all">True</property>
+            <property name="pulse_step">0.34999999999999998</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -350,7 +351,8 @@ Author: Ahmad Hasan Mubashshir <ahmubashshir@gmail.com>
           <object class="GtkProgressBar" id="basepb">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="show_text">True</property>
+            <property name="no_show_all">True</property>
+            <property name="pulse_step">0.34999999999999998</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -360,8 +362,9 @@ Author: Ahmad Hasan Mubashshir <ahmubashshir@gmail.com>
         </child>
         <child>
           <object class="GtkScrolledWindow">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">False</property>
+            <property name="no_show_all">True</property>
             <property name="hadjustment">hadjust</property>
             <property name="vadjustment">vadjust</property>
             <property name="vscrollbar_policy">always</property>
@@ -370,8 +373,9 @@ Author: Ahmad Hasan Mubashshir <ahmubashshir@gmail.com>
             <property name="max_content_height">70</property>
             <child>
               <object class="GtkTreeView" id="list">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <property name="no_show_all">True</property>
                 <property name="hadjustment">hadjust</property>
                 <property name="vadjustment">vadjust</property>
                 <property name="model">filelist</property>

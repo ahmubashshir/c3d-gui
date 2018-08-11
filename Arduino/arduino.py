@@ -85,7 +85,26 @@ else:
 						out += self.dev.read(1).decode('utf-8')
 					if out != '':
 						print(out,end='')
-
+		def sendFile(self,path,function):
+			out=''
+			while self.dev.inWaiting() > 0:
+				out += self.dev.read(1).decode('utf-8')
+			if out != '':
+				print(out,end='')
+			
+			with open(path,"r") as f:
+				a=f.read().splitlines()
+				print(a)
+				for n in a:
+					function()
+					cmd=bytes(n+self.lt,'utf-8')
+					self.dev.write(cmd)
+					out = ''
+					time.sleep(1)
+					while self.dev.inWaiting() > 0:
+						out += self.dev.read(1).decode('utf-8')
+					if out != '':
+						print(out,end='')
 		def send(self,*cmd):
 			if cmd !=[]:
 				for n in cmd:

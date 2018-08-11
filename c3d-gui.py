@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-import os,sys
+import os,sys,threading
+
 try:
 	import gi
 	gi.require_version('Gtk', '3.0')
-	from gi.repository import Gtk
+	from gi.repository import GLib, Gtk, GObject
 except:
 	print("PyGObject not found")
 try:
@@ -46,17 +47,29 @@ def show_err(message):
 	dlg.set_icon_name("dialog-error")
 	dlg.run()
 	dlg.destroy()
+	
+def update_progess():
+	progress.pulse()
+	progress.show()
+	return False
+def print_file(printer,path):
+	printer.sendFile(path, lambda:GLib.idle_add(update_progess) )
+	pr.set_sensitive(True)
+	progress.hide()
+	fc.show()
 class itembox(Gtk.Label):
 	def __init__(self,filepath):
 		self.set_text(filepath)
-
+printer=None
+path=""
+thread = threading.Thread(target=print_file,args=[printer,path])
 class Handler:
 	def onDeleteWindow(self, *args):
 		window.destroy()
 		mmenubtn.destroy()
 		Gtk.main_quit(*args)
 	def aboutm_activate(self,*args):
-		#print("Hello")
+		#print_file("Hello")
 		#mmenubtn.get_popover().hide()
 		Rosponse=abt.run()
 		if Rosponse==Gtk.ResponseType.DELETE_EVENT:
@@ -89,12 +102,19 @@ class Handler:
 				printer=arduino.port(port=comm.get_active_text(),baud=baud.get_value_as_int())
 				print(printer)
 				if printer != None:
-					printer.sendFile(path)
+					thread.daemon = True
+					thread.start()
+					pr.set_sensitive(False)
+					fc.hide()
 			else:
 				printer=arduino.port(port=comm.get_active_text(),baud=baud.get_value_as_int())
 				print(printer)
 				if printer != None:
-					printer.sendFile(path)
+					thread = threading.Thread(target=print_file,args=[printer,path])
+					thread.daemon = True
+					thread.start()
+					pr.set_sensitive(False)
+					fc.hide()
 		except arduino.InvalidPort:
 			show_err("You should plug & connect\nthe printer before printing")
 			return 0
@@ -138,12 +158,14 @@ mmenubtn=builder.get_object('mainmenu')
 abm=builder.get_object('aboutm')
 abt=builder.get_object('about-win')
 fc=builder.get_object('file')
+progress=builder.get_object('filepb')
 fcFilter=Gtk.FileFilter()
 lst=builder.get_object('list')
 sel=builder.get_object('sel')
 cfg=builder.get_object('cfg')
 baud=builder.get_object('baud_spin')
 comm=builder.get_object('port')
+pr=builder.get_object('pr')
 #Format:Widget=builder.get_object('<OBJECT-ID>')
 #print(Gtk.ResponseType.ACCEPT.__int__())
 #print(Gtk.ResponseType.APPLY.__int__())
@@ -189,5 +211,6 @@ builder.get_object('cell_enabled').set_activatable(True)
 model=None
 treeiter=None
 #Startup
+GObject.threads_init()
 window.show_all()
 Gtk.main()
