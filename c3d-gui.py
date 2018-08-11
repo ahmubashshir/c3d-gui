@@ -35,14 +35,15 @@ comport=''
 baudrate=115200
 def show_err(message):
 	dlg=Gtk.MessageDialog(
-		window,
-		0,
-		Gtk.MessageType.ERROR,
-		Gtk.ButtonsType.OK,
-		"You\'ve forgotten Something"
+		parent=window,
+		flags=0,
+		message_type=Gtk.MessageType.ERROR,
+		buttons=Gtk.ButtonsType.OK,
+		text="You\'ve forgotten Something"
 	)
 	dlg.set_title("Error")
 	dlg.format_secondary_text(message)
+	dlg.set_icon_name("dialog-error")
 	dlg.run()
 	dlg.destroy()
 class itembox(Gtk.Label):
@@ -67,25 +68,36 @@ class Handler:
 	
 	def pr_activate_cb(self,*args):
 		try:
-			path=fc.get_uri().replace("file://",'')
+			if os.name=='nt':
+				path=fc.get_uri().replace("file:///",'').replace("/","\\")
+			else:
+				path=fc.get_uri().replace("file://",'')
 			print(path)
 		except AttributeError:
 			show_err("Select file to print")
+			return 0
 		printer=None
 		try:
-			if baudrate==None or comport=='':
-				printer=arduino.port()
+			print(comport)
+			print(baudrate)
+			if baud.get_value_as_int()==None or comm.get_active_text()=='':
+				resp=cfg.run()
+				if resp==Gtk.ResponseType.APPLY or resp==Gtk.ResponseType.CANCEL or Gtk.ResponseType.DELETE_EVENT:
+					cfg.hide()
+				print(comm.get_active_text())
+				print(baud.get_value_as_int())
+				printer=arduino.port(port=comm.get_active_text(),baud=baud.get_value_as_int())
 				print(printer)
 				if printer != None:
 					printer.sendFile(path)
 			else:
-				printer=arduino.port(port=comport,baud=baudrate)
+				printer=arduino.port(port=comm.get_active_text(),baud=baud.get_value_as_int())
 				print(printer)
 				if printer != None:
 					printer.sendFile(path)
-
 		except arduino.InvalidPort:
 			show_err("You should plug & connect\nthe printer before printing")
+			return 0
 	def cl_activate_cb():
 		print("clear")
 	def rm_activate_cb():
@@ -108,11 +120,8 @@ class Handler:
 		resp=cfg.run()
 		if resp==Gtk.ResponseType.APPLY or resp==Gtk.ResponseType.CANCEL or Gtk.ResponseType.DELETE_EVENT:
 			cfg.hide()
-			if resp==Gtk.ResponseType.APPLY:
-				baudrate=baud.get_value_as_int()
-				comport=comm.get_active_text()
-			print(comport)
-			print(baudrate)
+			print(comm.get_active_text())
+			print(baud.get_value_as_int())
 #Dont Edit
 builder = Gtk.Builder()
 try:

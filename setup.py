@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 import os, site, sys
 from cx_Freeze import setup, Executable
 

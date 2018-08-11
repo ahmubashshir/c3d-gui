@@ -5,12 +5,19 @@ class InvalidPort(Exception):
 		self.message = message
 if os.name=='nt':
 	class port(object):
-		def __init__(self,port="COM1",baud=9600,stopbit=port.STOPBITS_TWO,time=0,lt='\n'):
-			self.dev=serial.Serial(port,baud,timeout=time,stopbits=stopbit)
-			self.lt=lt
-			self.out=''
+		def __init__(self,port="COM1",baud=9600,stopbit=serial.STOPBITS_TWO,time=0,lt='\n'):
+			self.inited=False
+			try:
+				self.dev=serial.Serial(port,baud,timeout=time,stopbits=stopbit)
+				self.inited=True
+				print("Creating")
+				self.lt=lt
+				self.out=''
+				print(self.dev)
+			except serial.serialutil.SerialException:
+				raise InvalidPort(port+" not found")
 		def __del__(self):
-			if self.dev != None :
+			if self.inited:
 				self.dev.close()
 		def sendFile(self,path):
 			out=''
