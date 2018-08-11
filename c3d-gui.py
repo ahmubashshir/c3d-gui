@@ -33,7 +33,7 @@ elif sys.platform=="darwin":
 from Arduino import arduino
 UI='c3d-gui'
 comport=''
-baudrate=115200
+baudrate=300
 def show_err(message):
 	dlg=Gtk.MessageDialog(
 		parent=window,
@@ -63,6 +63,7 @@ class itembox(Gtk.Label):
 printer=None
 path=""
 thread = threading.Thread(target=print_file,args=[printer,path])
+thread.daemon = True
 class Handler:
 	def onDeleteWindow(self, *args):
 		window.destroy()
@@ -91,8 +92,6 @@ class Handler:
 			return 0
 		printer=None
 		try:
-			print(comport)
-			print(baudrate)
 			if baud.get_value_as_int()==None or comm.get_active_text()=='':
 				resp=cfg.run()
 				if resp==Gtk.ResponseType.APPLY or resp==Gtk.ResponseType.CANCEL or Gtk.ResponseType.DELETE_EVENT:
@@ -102,21 +101,21 @@ class Handler:
 				printer=arduino.port(port=comm.get_active_text(),baud=baud.get_value_as_int())
 				print(printer)
 				if printer != None:
-					thread.daemon = True
 					thread.start()
 					pr.set_sensitive(False)
 					fc.hide()
 			else:
+				print(comm.get_active_text())
+				print(baud.get_value_as_int())
 				printer=arduino.port(port=comm.get_active_text(),baud=baud.get_value_as_int())
 				print(printer)
 				if printer != None:
-					thread = threading.Thread(target=print_file,args=[printer,path])
-					thread.daemon = True
 					thread.start()
 					pr.set_sensitive(False)
 					fc.hide()
 		except arduino.InvalidPort:
 			show_err("You should plug & connect\nthe printer before printing")
+			comm.get_child().set_text("")
 			return 0
 	def cl_activate_cb():
 		print("clear")
@@ -211,6 +210,7 @@ builder.get_object('cell_enabled').set_activatable(True)
 model=None
 treeiter=None
 #Startup
-GObject.threads_init()
+if gi.version_info<(3,11):
+	GObject.threads_init()
 window.show_all()
 Gtk.main()
